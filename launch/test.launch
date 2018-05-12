@@ -19,7 +19,7 @@
             <remap from="image_raw" to="object_image"/>
             <remap from="objects_in" to="object_data"/>
             <remap from="image_out" to="annotated_image"/>
-             </node>
+      </node>
       <!-- -->
       <!-- viewer -->
       <node name="object_viewer" pkg="nodelet" type="nodelet" 
