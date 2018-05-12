@@ -9,7 +9,7 @@
             <remap from="image_raw" to="image_raw"/>
             <remap from="image_out" to="object_image"/>
             <remap from="objects_out" to="object_data"/>
-            <param name="type" value="MOG"/>
+            <param name="detection_algorithm" value="MOG"/>
             <param name="republish_image" value="true"/>
       </node>
       <!-- -->

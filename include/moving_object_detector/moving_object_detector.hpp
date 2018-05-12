@@ -38,28 +38,28 @@ private:
     ros::NodeHandle &pnh(getPrivateNodeHandle());
 
     // load params
-    const std::string type(pnh.param< std::string >("type", "CNT"));
+    const std::string algorithm(pnh.param< std::string >("detection_algorithm", "CNT"));
     republish_image_ = pnh.param("republish_image", false);
 
     // setup a detector
     // (TODO: make a way to specify parameters)
-    if (type == "CNT") {
+    if (algorithm == "CNT") {
       detector_ = cv::bgsegm::createBackgroundSubtractorCNT();
-    } else if (type == "GMG") {
+    } else if (algorithm == "GMG") {
       detector_ = cv::bgsegm::createBackgroundSubtractorGMG();
-    } else if (type == "GSOC") {
+    } else if (algorithm == "GSOC") {
       detector_ = cv::bgsegm::createBackgroundSubtractorGSOC();
-    } else if (type == "KNN") {
+    } else if (algorithm == "KNN") {
       detector_ = cv::createBackgroundSubtractorKNN();
-    } else if (type == "LSBP") {
+    } else if (algorithm == "LSBP") {
       detector_ = cv::bgsegm::createBackgroundSubtractorLSBP();
-    } else if (type == "MOG") {
+    } else if (algorithm == "MOG") {
       detector_ = cv::bgsegm::createBackgroundSubtractorMOG();
-    } else if (type == "MOG2") {
+    } else if (algorithm == "MOG2") {
       detector_ = cv::createBackgroundSubtractorMOG2();
     } else {
-      ROS_WARN_STREAM("Unsupported background subtractor type: " << type
-                                                                 << ". Will use defalut type.");
+      ROS_WARN_STREAM("Unsupported detection algorithm type: " << algorithm
+                                                               << ". Will use the defalut.");
       detector_ = cv::bgsegm::createBackgroundSubtractorCNT();
     }
 
