@@ -67,8 +67,8 @@ private:
   }
 
   void detect(const sensor_msgs::ImageConstPtr &image_msg) {
-    // ROS image message -> opencv's image
-    cv_bridge::CvImageConstPtr image(cv_bridge::toCvShare(image_msg /* , "bgr8" */));
+    // ROS image message -> opencv's 24-bit image the detector can accept
+    cv_bridge::CvImageConstPtr image(cv_bridge::toCvShare(image_msg, "bgr8"));
     if (!image) {
       ROS_ERROR("Image conversion error");
       return;
