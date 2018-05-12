@@ -12,6 +12,11 @@ objects_out (object_detection_msgs/Objects)
 * data and location of detected objects
 
 ## Parameters
+~type (string, default: "CNT")
+* type of detection algorithm
+* "CNT", "GMG", "GSOC", "KNN", "LSBP", "MOG", or "MOG2"
+* see opencv's documentation for algorithm details
+
 ~republish_image (bool, default: false)
 * republish image if moving objects are found in it
 
