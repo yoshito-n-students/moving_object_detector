@@ -10,8 +10,7 @@
 #include <image_transport/transport_hints.h>
 #include <nodelet/nodelet.h>
 #include <object_detection_msgs/Objects.h>
-#include <object_detection_msgs/Point.h>
-#include <object_detection_msgs/Points.h>
+#include <object_detection_msgs/cv_conversions.hpp>
 #include <ros/console.h>
 #include <ros/node_handle.h>
 #include <ros/publisher.h>
@@ -38,29 +37,17 @@ private:
     ros::NodeHandle &pnh(getPrivateNodeHandle());
 
     // load params
-    const std::string algorithm(pnh.param< std::string >("detection_algorithm", "CNT"));
+    const std::string default_algorithm("CNT");
+    const std::string algorithm(pnh.param("detection_algorithm", default_algorithm));
     republish_image_ = pnh.param("republish_image", false);
 
     // setup a detector
-    // (TODO: make a way to specify parameters)
-    if (algorithm == "CNT") {
-      detector_ = cv::bgsegm::createBackgroundSubtractorCNT();
-    } else if (algorithm == "GMG") {
-      detector_ = cv::bgsegm::createBackgroundSubtractorGMG();
-    } else if (algorithm == "GSOC") {
-      detector_ = cv::bgsegm::createBackgroundSubtractorGSOC();
-    } else if (algorithm == "KNN") {
-      detector_ = cv::createBackgroundSubtractorKNN();
-    } else if (algorithm == "LSBP") {
-      detector_ = cv::bgsegm::createBackgroundSubtractorLSBP();
-    } else if (algorithm == "MOG") {
-      detector_ = cv::bgsegm::createBackgroundSubtractorMOG();
-    } else if (algorithm == "MOG2") {
-      detector_ = cv::createBackgroundSubtractorMOG2();
-    } else {
-      ROS_WARN_STREAM("Unsupported detection algorithm type: " << algorithm
-                                                               << ". Will use the defalut.");
-      detector_ = cv::bgsegm::createBackgroundSubtractorCNT();
+    // (TODO: make a way to tune the algorithm)
+    detector_ = createDetector(algorithm);
+    if (!detector_) {
+      ROS_WARN_STREAM("Unsupported detection algorithm type: " << algorithm << ". Will use "
+                                                               << default_algorithm << ".");
+      detector_ = createDetector(default_algorithm);
     }
 
     // setup result publishers
@@ -79,8 +66,8 @@ private:
   }
 
   void detect(const sensor_msgs::ImageConstPtr &image_msg) {
-    // ROS image message -> opencv's image
-    cv_bridge::CvImageConstPtr image(cv_bridge::toCvShare(image_msg /* , "bgr8" */));
+    // ROS image message -> opencv's 24-bit image the detector can accept
+    cv_bridge::CvImageConstPtr image(cv_bridge::toCvShare(image_msg, "bgr8"));
     if (!image) {
       ROS_ERROR("Image conversion error");
       return;
@@ -112,8 +99,28 @@ private:
     const object_detection_msgs::ObjectsPtr object_msg(new object_detection_msgs::Objects);
     object_msg->header = image_msg->header;
     object_msg->names = toNamesMsg(contours.size());
-    object_msg->contours = toContoursMsg(contours);
+    object_msg->contours = object_detection_msgs::toContoursMsg(contours);
     object_publisher_.publish(object_msg);
+  }
+
+  // utility function to create foreground detection algorithm by name
+  static cv::Ptr< cv::BackgroundSubtractor > createDetector(const std::string &algorithm) {
+    if (algorithm == "CNT") {
+      return cv::bgsegm::createBackgroundSubtractorCNT();
+    } else if (algorithm == "GMG") {
+      return cv::bgsegm::createBackgroundSubtractorGMG();
+    } else if (algorithm == "GSOC") {
+      return cv::bgsegm::createBackgroundSubtractorGSOC();
+    } else if (algorithm == "KNN") {
+      return cv::createBackgroundSubtractorKNN();
+    } else if (algorithm == "LSBP") {
+      return cv::bgsegm::createBackgroundSubtractorLSBP();
+    } else if (algorithm == "MOG") {
+      return cv::bgsegm::createBackgroundSubtractorMOG();
+    } else if (algorithm == "MOG2") {
+      return cv::createBackgroundSubtractorMOG2();
+    }
+    return cv::Ptr< cv::BackgroundSubtractor >();
   }
 
   // utility function to give simple names to objects
@@ -123,25 +130,6 @@ private:
       names_msg.push_back(boost::lexical_cast< std::string >(i));
     }
     return names_msg;
-  }
-
-  // utility function to convert opencv's contours to a ROS message
-  static std::vector< object_detection_msgs::Points >
-  toContoursMsg(const std::vector< std::vector< cv::Point > > &contours) {
-    namespace odm = object_detection_msgs;
-
-    std::vector< odm::Points > contours_msg;
-    BOOST_FOREACH (const std::vector< cv::Point > &points, contours) {
-      odm::Points points_msg;
-      BOOST_FOREACH (const cv::Point &point, points) {
-        odm::Point point_msg;
-        point_msg.x = point.x;
-        point_msg.y = point.y;
-        points_msg.points.push_back(point_msg);
-      }
-      contours_msg.push_back(points_msg);
-    }
-    return contours_msg;
   }
 
 private:
