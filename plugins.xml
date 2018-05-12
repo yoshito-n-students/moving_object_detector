@@ -1,0 +1,5 @@
+<library path="lib/libmoving_object_detector">
+    <class name="moving_object_detector/MovingObjectDetector" type="moving_object_detector::MovingObjectDetector" base_class_type="nodelet::Nodelet">
+        <description>detect moving objects in images</description>
+    </class>
+</library>
