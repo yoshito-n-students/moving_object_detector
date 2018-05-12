@@ -90,13 +90,13 @@ private:
       return;
     }
 
-    // detect forground mask
-    cv::Mat forground_mask;
-    detector_->apply(image->image, forground_mask);
+    // detect foreground mask
+    cv::Mat foreground_mask;
+    detector_->apply(image->image, foreground_mask);
 
-    // cluster forground mask by finding contours
+    // cluster foreground mask by finding contours
     std::vector< std::vector< cv::Point > > contours;
-    cv::findContours(forground_mask, contours, cv::noArray() /* optional contours hierarchy */,
+    cv::findContours(foreground_mask, contours, cv::noArray() /* optional contours hierarchy */,
                      cv::RETR_EXTERNAL /* detect external contours only */,
                      cv::CHAIN_APPROX_SIMPLE /* return only vertices of coutours */);
     if (contours.empty()) {

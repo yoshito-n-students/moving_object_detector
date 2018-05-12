@@ -1,11 +1,11 @@
 <launch>
       <!-- -->
       <!-- detector -->
-      <node name="detection_node" pkg="nodelet" type="nodelet" args="manager" output="screen"/>
+      <node name="object_detection_node" pkg="nodelet" type="nodelet" args="manager" output="screen"/>
       <!-- -->
       <!-- moving object detection -->
-      <node name="detector_loader" pkg="nodelet" type="nodelet" 
-            args="load moving_object_detector/MovingObjectDetector detection_node" output="screen">
+      <node name="object_detector_loader" pkg="nodelet" type="nodelet" 
+            args="load moving_object_detector/MovingObjectDetector object_detection_node" output="screen">
             <remap from="image_raw" to="image_raw"/>
             <remap from="image_out" to="object_image"/>
             <remap from="objects_out" to="object_data"/>
@@ -15,7 +15,7 @@
       <!-- -->
       <!-- object drawing -->
       <node name="object_drawer_loader" pkg="nodelet" type="nodelet" 
-            args="load object_drawer/ObjectDrawer detection_node" output="screen">
+            args="load object_drawer/ObjectDrawer object_detection_node" output="screen">
             <remap from="image_raw" to="object_image"/>
             <remap from="objects_in" to="object_data"/>
             <remap from="image_out" to="annotated_image"/>
