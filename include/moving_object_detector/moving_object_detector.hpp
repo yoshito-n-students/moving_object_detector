@@ -38,29 +38,17 @@ private:
     ros::NodeHandle &pnh(getPrivateNodeHandle());
 
     // load params
-    const std::string algorithm(pnh.param< std::string >("detection_algorithm", "CNT"));
+    const std::string default_algorithm("CNT");
+    const std::string algorithm(pnh.param("detection_algorithm", default_algorithm));
     republish_image_ = pnh.param("republish_image", false);
 
     // setup a detector
-    // (TODO: make a way to specify parameters)
-    if (algorithm == "CNT") {
-      detector_ = cv::bgsegm::createBackgroundSubtractorCNT();
-    } else if (algorithm == "GMG") {
-      detector_ = cv::bgsegm::createBackgroundSubtractorGMG();
-    } else if (algorithm == "GSOC") {
-      detector_ = cv::bgsegm::createBackgroundSubtractorGSOC();
-    } else if (algorithm == "KNN") {
-      detector_ = cv::createBackgroundSubtractorKNN();
-    } else if (algorithm == "LSBP") {
-      detector_ = cv::bgsegm::createBackgroundSubtractorLSBP();
-    } else if (algorithm == "MOG") {
-      detector_ = cv::bgsegm::createBackgroundSubtractorMOG();
-    } else if (algorithm == "MOG2") {
-      detector_ = cv::createBackgroundSubtractorMOG2();
-    } else {
-      ROS_WARN_STREAM("Unsupported detection algorithm type: " << algorithm
-                                                               << ". Will use the defalut.");
-      detector_ = cv::bgsegm::createBackgroundSubtractorCNT();
+    // (TODO: make a way to tune the algorithm)
+    detector_ = createDetector(algorithm);
+    if (!detector_) {
+      ROS_WARN_STREAM("Unsupported detection algorithm type: " << algorithm << ". Will use "
+                                                               << default_algorithm << ".");
+      detector_ = createDetector(default_algorithm);
     }
 
     // setup result publishers
@@ -114,6 +102,26 @@ private:
     object_msg->names = toNamesMsg(contours.size());
     object_msg->contours = toContoursMsg(contours);
     object_publisher_.publish(object_msg);
+  }
+
+  // utility function to create foreground detection algorithm by name
+  static cv::Ptr< cv::BackgroundSubtractor > createDetector(const std::string &algorithm) {
+    if (algorithm == "CNT") {
+      return cv::bgsegm::createBackgroundSubtractorCNT();
+    } else if (algorithm == "GMG") {
+      return cv::bgsegm::createBackgroundSubtractorGMG();
+    } else if (algorithm == "GSOC") {
+      return cv::bgsegm::createBackgroundSubtractorGSOC();
+    } else if (algorithm == "KNN") {
+      return cv::createBackgroundSubtractorKNN();
+    } else if (algorithm == "LSBP") {
+      return cv::bgsegm::createBackgroundSubtractorLSBP();
+    } else if (algorithm == "MOG") {
+      return cv::bgsegm::createBackgroundSubtractorMOG();
+    } else if (algorithm == "MOG2") {
+      return cv::createBackgroundSubtractorMOG2();
+    }
+    return cv::Ptr< cv::BackgroundSubtractor >();
   }
 
   // utility function to give simple names to objects
