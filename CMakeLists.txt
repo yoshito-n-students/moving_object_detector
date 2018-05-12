@@ -18,7 +18,12 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(OpenCV REQUIRED COMPONENTS
+  bgsegm
+  core
+  imgproc
+  video
+)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -157,6 +162,7 @@ add_dependencies(
 target_link_libraries(
   moving_object_detector
   ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
 )
 
 #############
