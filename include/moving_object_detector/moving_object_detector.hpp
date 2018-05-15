@@ -39,6 +39,7 @@ private:
     // load params
     const std::string default_algorithm("CNT");
     const std::string algorithm(pnh.param("detection_algorithm", default_algorithm));
+    enumerate_objects_ = pnh.param("enumerate_objects", true);
     republish_image_ = pnh.param("republish_image", false);
 
     // setup a detector
@@ -98,7 +99,9 @@ private:
     // publish found objects data
     const object_detection_msgs::ObjectsPtr object_msg(new object_detection_msgs::Objects);
     object_msg->header = image_msg->header;
-    object_msg->names = toNamesMsg(contours.size());
+    if (enumerate_objects_) {
+      object_msg->names = toNamesMsg(contours.size());
+    }
     object_msg->contours = object_detection_msgs::toContoursMsg(contours);
     object_publisher_.publish(object_msg);
   }
@@ -133,7 +136,7 @@ private:
   }
 
 private:
-  bool republish_image_;
+  bool enumerate_objects_,republish_image_;
 
   cv::Ptr< cv::BackgroundSubtractor > detector_;
 
