@@ -1,5 +1,9 @@
 # moving_object_detector
 
+## Dependencies
+object_detection_msgs
+* https://github.com/yoshito-n-students/object_detection_msgs
+
 ## Subscribed Topics
 image_raw (sensor_msgs/Image)
 
