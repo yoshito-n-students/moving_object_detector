@@ -1,5 +1,9 @@
 # moving_object_detector
 
+## Dependencies
+object_detection_msgs
+* https://github.com/yoshito-n-students/object_detection_msgs
+
 ## Subscribed Topics
 image_raw (sensor_msgs/Image)
 
@@ -18,6 +22,9 @@ objects_out (object_detection_msgs/Objects)
 
 ~republish_image (bool, default: false)
 * republish image if moving objects are found in it
+
+~enumerate_objects (bool, default: true)
+* publish object names by 1-based indices ("1", "2", ...)
 
 ~image_transport (string, default: "raw")
 * transport type of the subscribed image topic
