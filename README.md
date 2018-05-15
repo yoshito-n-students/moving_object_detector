@@ -23,6 +23,9 @@ objects_out (object_detection_msgs/Objects)
 ~republish_image (bool, default: false)
 * republish image if moving objects are found in it
 
+~enumerate_objects (bool, default: true)
+* publish object names by 1-based indices ("1", "2", ...)
+
 ~image_transport (string, default: "raw")
 * transport type of the subscribed image topic
 
