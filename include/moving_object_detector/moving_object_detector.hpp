@@ -107,21 +107,48 @@ private:
   }
 
   // utility function to create foreground detection algorithm by name
-  static cv::Ptr< cv::BackgroundSubtractor > createDetector(const std::string &algorithm) {
+  cv::Ptr< cv::BackgroundSubtractor > createDetector(const std::string &algorithm) {
+    ros::NodeHandle pnh(getPrivateNodeHandle(), algorithm);
     if (algorithm == "CNT") {
-      return cv::bgsegm::createBackgroundSubtractorCNT();
+      return cv::bgsegm::createBackgroundSubtractorCNT(
+          pnh.param< int >("min_pixel_stability", 15), pnh.param< bool >("use_history", true),
+          pnh.param< int >("max_pixel_stability", 15 * 60), pnh.param< bool >("is_parallel", true));
     } else if (algorithm == "GMG") {
-      return cv::bgsegm::createBackgroundSubtractorGMG();
+      return cv::bgsegm::createBackgroundSubtractorGMG(
+          pnh.param< int >("initialization_frames", 120),
+          pnh.param< double >("decision_threshold", 0.8));
     } else if (algorithm == "GSOC") {
-      return cv::bgsegm::createBackgroundSubtractorGSOC();
+      return cv::bgsegm::createBackgroundSubtractorGSOC(
+          pnh.param< int >("mc", cv::bgsegm::LSBP_CAMERA_MOTION_COMPENSATION_NONE),
+          pnh.param< int >("n_samples", 20), pnh.param< float >("replace_rate", 0.003),
+          pnh.param< float >("propagate_rate", 0.01), pnh.param< int >("hits_threshold", 32),
+          pnh.param< float >("alpha", 0.01), pnh.param< float >("beta", 0.0022),
+          pnh.param< float >("blinking_supression_decay", 0.1),
+          pnh.param< float >("blinking_supression_multiplier", 0.1),
+          pnh.param< float >("noise_removal_threshold_fac_bg", 0.0004),
+          pnh.param< float >("noise_removal_threshold_fac_fg", 0.0008));
     } else if (algorithm == "KNN") {
-      return cv::createBackgroundSubtractorKNN();
+      return cv::createBackgroundSubtractorKNN(pnh.param< int >("history", 500),
+                                               pnh.param< double >("dist2threshold", 400.),
+                                               pnh.param< bool >("detect_shadows", true));
     } else if (algorithm == "LSBP") {
-      return cv::bgsegm::createBackgroundSubtractorLSBP();
+      return cv::bgsegm::createBackgroundSubtractorLSBP(
+          pnh.param< int >("mc", cv::bgsegm::LSBP_CAMERA_MOTION_COMPENSATION_NONE),
+          pnh.param< int >("n_samples", 20), pnh.param< int >("lsbp_radius", 16),
+          pnh.param< float >("t_lower", 2.), pnh.param< float >("t_upper", 32.),
+          pnh.param< float >("t_inc", 1.), pnh.param< float >("t_dec", 0.05),
+          pnh.param< float >("r_scale", 10.), pnh.param< float >("r_incdec", 0.005),
+          pnh.param< float >("noise_removal_threshold_fac_bg", 0.0004),
+          pnh.param< float >("noise_removal_threshold_fac_fg", 0.0008),
+          pnh.param< int >("lsbp_threshold", 8), pnh.param< int >("min_count", 2));
     } else if (algorithm == "MOG") {
-      return cv::bgsegm::createBackgroundSubtractorMOG();
+      return cv::bgsegm::createBackgroundSubtractorMOG(
+          pnh.param< int >("history", 200), pnh.param< int >("nmixtures", 5),
+          pnh.param< double >("background_ratio", 0.7), pnh.param< double >("noise_sigma", 0.));
     } else if (algorithm == "MOG2") {
-      return cv::createBackgroundSubtractorMOG2();
+      return cv::createBackgroundSubtractorMOG2(pnh.param< int >("history", 500),
+                                                pnh.param< double >("var_threshold", 16.),
+                                                pnh.param< bool >("detect_shadows", true));
     }
     return cv::Ptr< cv::BackgroundSubtractor >();
   }
@@ -136,7 +163,7 @@ private:
   }
 
 private:
-  bool enumerate_objects_,republish_image_;
+  bool enumerate_objects_, republish_image_;
 
   cv::Ptr< cv::BackgroundSubtractor > detector_;
 
